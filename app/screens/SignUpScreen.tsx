@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useForm, Controller } from "react-hook-form";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth } from "../../firebase";
 import { RootStackParamList } from "../App";
 
@@ -27,8 +27,12 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
     setIsLoading(true);
     const { email, password } = data;
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      Alert.alert("Success", "Account created successfully!");
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      if (user) {
+        await sendEmailVerification(user);
+        Alert.alert("success","Verification email sent. Please check your inbox.");
+      }
       navigation.navigate("Login");
     } catch (error: any) {
       if (error.code === "auth/email-already-in-use") {

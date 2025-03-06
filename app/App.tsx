@@ -51,7 +51,7 @@ if(isLoading) {
 
   return (
     <NavigationContainer>
-        {auth.currentUser ? (
+        {user && user.emailVerified ? (
           <RootTab.Navigator
           screenOptions={({ route }) => ({
             headerShown: false, // Keep or customize as needed

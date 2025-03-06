@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useForm, Controller } from "react-hook-form";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { sendEmailVerification, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { auth } from "../../firebase";
 import { RootStackParamList } from "../App";
 
@@ -27,7 +27,14 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
     setIsLoading(true);
     const { email, password } = data;
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      if (user.emailVerified) {
+        Alert.alert("Success", "Logged in successfully!");
+      } else {
+        await signOut(auth);
+        Alert.alert("Login Failed", "Please verify your email first. Check your inbox, an email has been sent to you. Then, Try Login again");
+      }
     } catch (error: any) {
       if (error.code === "auth/invalid-credential") {
         Alert.alert("Login Failed", "Please enter a valid email and password.");
